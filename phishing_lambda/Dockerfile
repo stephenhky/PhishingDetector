@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 RUN pip install awslambdaric boto3
 
 ENTRYPOINT [ "python", "-m", "awslambdaric" ]
-CMD [ "sbertsim.lambda_handler" ]
+CMD [ "main.lambda_handler" ]
