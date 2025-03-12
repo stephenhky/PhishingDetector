@@ -1,0 +1,5 @@
+numpy
+onnxruntime
+huggingface_hub
+flask
+python-dotenv
