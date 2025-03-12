@@ -9,9 +9,10 @@ args = argparser.parse_args()
 
 
 import os
+from datetime import datetime, timezone
+import json
 
 from flask import Flask, request, jsonify
-import numpy as np
 import onnxruntime
 from huggingface_hub import hf_hub_download
 from dotenv import load_dotenv
@@ -28,6 +29,18 @@ sess = onnxruntime.InferenceSession(
     model_path,
     providers=["CPUExecutionProvider"],
 )
+
+
+def write_log(ID, jsonobj):
+    tempdir = os.getenv('LOGGINGDIR')
+    if tempdir is None:
+        return
+
+    json.dump(
+        jsonobj,
+        open(os.path.join(tempdir, ID+".json"), 'w')
+    )
+
 
 # Starting the Flask API
 app = Flask("Phishingdetector")
@@ -51,14 +64,27 @@ def detect_phishing():
         })
 
     results = sess.run(None, {"inputs": [url]})
-    return jsonify({
+
+    # get time
+    dt = datetime.now()
+    dtstr = dt.replace(tzinfo=timezone.utc).isoformat()
+
+    # prepare return object
+    return_obj = {
         "query": data,
         "result": {
             "url": url,
-            "phishing": (results[0][0] == 1),
+            "phishing": True if results[0][0] == 1 else False,   # must specify bool value like this
             "phishing_probability": float(results[1][0, 1])
-        }
-    })
+        },
+        "time": dtstr
+    }
+
+    # logging
+    write_log("log"+dtstr, return_obj)
+
+    # result result
+    return jsonify(return_obj)
 
 
 if __name__ == "__main__":
