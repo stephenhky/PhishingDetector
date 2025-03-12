@@ -2,3 +2,4 @@ onnxruntime
 huggingface_hub
 flask
 python-dotenv
+numpy<2
