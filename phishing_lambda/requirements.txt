@@ -1,4 +1,3 @@
-numpy
 onnxruntime
 huggingface_hub
 flask
